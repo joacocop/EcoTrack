@@ -1,0 +1,107 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EcoTrack</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  </head>
+  <body>
+    <header>
+      <h1>EcoTrack</h1>
+      <p>Monitoreo de huella de carbono con MongoDB, Mongoose y consultas geoespaciales.</p>
+    </header>
+    <main>
+      <section class="auth-panel" id="authPanel">
+        <div>
+          <h2>Iniciar sesión</h2>
+          <form id="loginForm">
+            <input type="email" id="loginEmail" placeholder="Email" required />
+            <input type="password" id="loginPassword" placeholder="Contraseña" required />
+            <button type="submit">Entrar</button>
+          </form>
+        </div>
+        <div>
+          <h2>Registrarse</h2>
+          <form id="registerForm">
+            <input type="text" id="registerName" placeholder="Nombre" required />
+            <input type="email" id="registerEmail" placeholder="Email" required />
+            <input type="password" id="registerPassword" placeholder="Contraseña" required />
+            <button type="submit">Crear cuenta</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="dashboard hidden" id="dashboard">
+        <div class="top-bar">
+          <div>
+            <span id="userName"></span>
+            <button id="logoutButton">Cerrar sesión</button>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <h3>Meta semanal</h3>
+              <p id="metaInfo">Cargar meta</p>
+            </div>
+            <div class="card">
+              <h3>Huella esta semana</h3>
+              <p id="weeklyCO2">0 kg CO2</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="forms-row">
+          <article class="panel">
+            <h2>Agregar actividad</h2>
+            <form id="activityForm">
+              <label>Tipo</label>
+              <select id="activityType" required>
+                <option value="transporte">Transporte</option>
+                <option value="electricidad">Electricidad</option>
+                <option value="alimentacion">Alimentación</option>
+                <option value="residuos">Residuos</option>
+              </select>
+
+              <div id="detailsFields"></div>
+
+              <label>Latitud</label>
+              <input type="number" step="any" id="latInput" placeholder="-34.6" required />
+              <label>Longitud</label>
+              <input type="number" step="any" id="lngInput" placeholder="-58.4" required />
+
+              <button type="submit">Guardar actividad</button>
+            </form>
+          </article>
+
+          <article class="panel">
+            <h2>Meta semanal</h2>
+            <form id="metaForm">
+              <label>Objetivo CO2 semanal</label>
+              <input type="number" id="metaValue" placeholder="Ej. 20" min="0" required />
+              <button type="submit">Guardar meta</button>
+            </form>
+
+            <h2>Ranking global</h2>
+            <div id="rankingList">Cargando...</div>
+          </article>
+        </div>
+
+        <article class="panel full-width">
+          <h2>Mapa de actividades</h2>
+          <div id="map"></div>
+        </article>
+
+        <article class="panel full-width">
+          <h2>Actividades recientes</h2>
+          <div id="activitiesList">Cargando...</div>
+        </article>
+      </section>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/mapa.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>
