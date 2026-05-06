@@ -9,8 +9,15 @@
   </head>
   <body>
     <header>
-      <h1>EcoTrack</h1>
+      <h1>🌿 EcoTrack</h1>
       <p>Monitoreo de huella de carbono con MongoDB, Mongoose y consultas geoespaciales.</p>
+      <nav id="nav" class="hidden">
+        <span id="userName"></span>
+        <a href="#" id="scrollToActivity">Actividades</a>
+        <a href="#" id="scrollToMap">Mapa</a>
+        <a href="#" id="scrollToStats">Estadísticas</a>
+        <button id="logoutButton">Cerrar sesión</button>
+      </nav>
     </header>
     <main>
       <section class="auth-panel" id="authPanel">
@@ -40,20 +47,14 @@
       </section>
 
       <section class="dashboard hidden" id="dashboard">
-        <div class="top-bar">
-          <div>
-            <span id="userName"></span>
-            <button id="logoutButton">Cerrar sesión</button>
+        <div class="cards">
+          <div class="card">
+            <h3>Meta semanal</h3>
+            <p id="metaInfo">Cargar meta</p>
           </div>
-          <div class="cards">
-            <div class="card">
-              <h3>Meta semanal</h3>
-              <p id="metaInfo">Cargar meta</p>
-            </div>
-            <div class="card">
-              <h3>Huella esta semana</h3>
-              <p id="weeklyCO2">0 kg CO2</p>
-            </div>
+          <div class="card">
+            <h3>Huella esta semana</h3>
+            <p id="weeklyCO2">0 kg CO2</p>
           </div>
         </div>
 

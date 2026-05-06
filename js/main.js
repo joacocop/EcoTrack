@@ -16,6 +16,10 @@ const loginSection = document.getElementById('loginSection');
 const registerSection = document.getElementById('registerSection');
 const showRegister = document.getElementById('showRegister');
 const showLogin = document.getElementById('showLogin');
+const nav = document.getElementById('nav');
+const scrollToActivity = document.getElementById('scrollToActivity');
+const scrollToMap = document.getElementById('scrollToMap');
+const scrollToStats = document.getElementById('scrollToStats');
 
 const renderDetailsFields = () => {
   const type = activityType.value;
@@ -74,12 +78,14 @@ const showUI = async () => {
     const profile = await window.EcoTrackAPI.profile();
     authPanel.classList.add('hidden');
     dashboard.classList.remove('hidden');
+    nav.classList.remove('hidden');
     userName.textContent = `Hola, ${profile.nombre}`;
     await refreshDashboard();
   } catch (error) {
     clearToken();
     authPanel.classList.remove('hidden');
     dashboard.classList.add('hidden');
+    nav.classList.add('hidden');
   }
 };
 
@@ -149,10 +155,26 @@ showLogin.addEventListener('click', (e) => {
   loginSection.classList.remove('hidden');
 });
 
+scrollToActivity.addEventListener('click', (e) => {
+  e.preventDefault();
+  document.getElementById('activityForm').scrollIntoView({ behavior: 'smooth' });
+});
+
+scrollToMap.addEventListener('click', (e) => {
+  e.preventDefault();
+  document.getElementById('map').scrollIntoView({ behavior: 'smooth' });
+});
+
+scrollToStats.addEventListener('click', (e) => {
+  e.preventDefault();
+  document.getElementById('rankingList').scrollIntoView({ behavior: 'smooth' });
+});
+
 logoutButton.addEventListener('click', () => {
   clearToken();
   authPanel.classList.remove('hidden');
   dashboard.classList.add('hidden');
+  nav.classList.add('hidden');
   loginSection.classList.remove('hidden');
   registerSection.classList.add('hidden');
 });
