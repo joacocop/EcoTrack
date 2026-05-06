@@ -14,15 +14,18 @@
     </header>
     <main>
       <section class="auth-panel" id="authPanel">
-        <div>
+        <div id="loginSection">
           <h2>Iniciar sesión</h2>
           <form id="loginForm">
             <input type="email" id="loginEmail" placeholder="Email" required />
             <input type="password" id="loginPassword" placeholder="Contraseña" required />
             <button type="submit">Entrar</button>
           </form>
+          <p class="switch-link">
+            ¿No tienes cuenta? <a href="#" id="showRegister">Regístrate aquí</a>
+          </p>
         </div>
-        <div>
+        <div id="registerSection" class="hidden">
           <h2>Registrarse</h2>
           <form id="registerForm">
             <input type="text" id="registerName" placeholder="Nombre" required />
@@ -30,6 +33,9 @@
             <input type="password" id="registerPassword" placeholder="Contraseña" required />
             <button type="submit">Crear cuenta</button>
           </form>
+          <p class="switch-link">
+            ¿Ya tienes cuenta? <a href="#" id="showLogin">Inicia sesión aquí</a>
+          </p>
         </div>
       </section>
 

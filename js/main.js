@@ -12,6 +12,10 @@ const rankingList = document.getElementById('rankingList');
 const metaForm = document.getElementById('metaForm');
 const metaInfo = document.getElementById('metaInfo');
 const weeklyCO2 = document.getElementById('weeklyCO2');
+const loginSection = document.getElementById('loginSection');
+const registerSection = document.getElementById('registerSection');
+const showRegister = document.getElementById('showRegister');
+const showLogin = document.getElementById('showLogin');
 
 const renderDetailsFields = () => {
   const type = activityType.value;
@@ -132,10 +136,25 @@ const buildDetails = () => {
 };
 
 activityType.addEventListener('change', renderDetailsFields);
+
+showRegister.addEventListener('click', (e) => {
+  e.preventDefault();
+  loginSection.classList.add('hidden');
+  registerSection.classList.remove('hidden');
+});
+
+showLogin.addEventListener('click', (e) => {
+  e.preventDefault();
+  registerSection.classList.add('hidden');
+  loginSection.classList.remove('hidden');
+});
+
 logoutButton.addEventListener('click', () => {
   clearToken();
   authPanel.classList.remove('hidden');
   dashboard.classList.add('hidden');
+  loginSection.classList.remove('hidden');
+  registerSection.classList.add('hidden');
 });
 
 loginForm.addEventListener('submit', async (event) => {

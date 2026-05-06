@@ -19,15 +19,27 @@ main {
   margin: 0 auto;
 }
 .auth-panel {
-  display: grid;
-  gap: 1rem;
   margin-bottom: 1.5rem;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .auth-panel div {
   background: white;
   border-radius: 10px;
   padding: 1rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+.switch-link {
+  text-align: center;
+  margin-top: 1rem;
+}
+.switch-link a {
+  color: #1c7d49;
+  text-decoration: none;
+}
+.switch-link a:hover {
+  text-decoration: underline;
 }
 .hidden {
   display: none;
