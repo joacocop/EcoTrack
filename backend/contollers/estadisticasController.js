@@ -33,7 +33,7 @@ exports.createMeta = async (req, res) => {
     const week = semana || getWeekKey();
 
     const meta = await Meta.findOneAndUpdate(
-      { userId: req.user.id, semana: week },
+      { userId: new mongoose.Types.ObjectId(req.user.id), semana: week },
       { objetivoCO2 },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
@@ -47,13 +47,13 @@ exports.createMeta = async (req, res) => {
 exports.getMetaProgress = async (req, res) => {
   try {
     const semana = req.query.semana || getWeekKey();
-    const meta = await Meta.findOne({ userId: req.user.id, semana });
+    const meta = await Meta.findOne({ userId: new mongoose.Types.ObjectId(req.user.id), semana });
     const { monday, sunday } = getCurrentWeekRange();
 
     const actividades = await Actividad.aggregate([
       {
         $match: {
-          userId: mongoose.Types.ObjectId(req.user.id),
+          userId: new mongoose.Types.ObjectId(req.user.id),
           fecha: { $gte: monday, $lte: sunday },
         },
       },
@@ -68,6 +68,7 @@ exports.getMetaProgress = async (req, res) => {
 
     res.json({ meta: meta || null, progreso: actividades[0] || { totalCO2: 0, count: 0 } });
   } catch (error) {
+    console.error('Error en getMetaProgress:', error);
     res.status(500).json({ message: 'Error obteniendo progreso de meta', error: error.message });
   }
 };
@@ -105,7 +106,7 @@ exports.reportSemanal = async (req, res) => {
     const reportes = await Actividad.aggregate([
       {
         $match: {
-          userId: mongoose.Types.ObjectId(req.user.id),
+          userId: new mongoose.Types.ObjectId(req.user.id),
           fecha: { $gte: hace7 },
         },
       },

@@ -10,6 +10,7 @@ const detailsFields = document.getElementById('detailsFields');
 const activitiesList = document.getElementById('activitiesList');
 const rankingList = document.getElementById('rankingList');
 const metaForm = document.getElementById('metaForm');
+const metaValueInput = document.getElementById('metaValue');
 const metaInfo = document.getElementById('metaInfo');
 const weeklyCO2 = document.getElementById('weeklyCO2');
 const loginSection = document.getElementById('loginSection');
@@ -94,7 +95,11 @@ const refreshDashboard = async () => {
     const activities = await window.EcoTrackAPI.getActivities();
     window.MapController.updateMap(activities);
     window.MapController.showActivities();
+  } catch (error) {
+    console.error('Error cargando actividades:', error);
+  }
 
+  try {
     const ranking = await window.EcoTrackAPI.getRanking();
     rankingList.innerHTML = ranking
       .map(
@@ -105,17 +110,28 @@ const refreshDashboard = async () => {
           </div>`
       )
       .join('');
-
-    const meta = await window.EcoTrackAPI.getMeta();
-    if (meta.meta) {
-      metaInfo.textContent = `${meta.meta.objetivoCO2} kg CO2 / semana`;
-      weeklyCO2.textContent = `${meta.progreso.totalCO2.toFixed(2)} kg CO2`;
-    } else {
-      metaInfo.textContent = 'Aún no definiste una meta';
-      weeklyCO2.textContent = `${meta.progreso.totalCO2.toFixed(2)} kg CO2`;
-    }
   } catch (error) {
-    console.error(error);
+    console.error('Error cargando ranking:', error);
+    rankingList.innerHTML = '<p>No se pudo cargar el ranking.</p>';
+  }
+
+  try {
+    const meta = await window.EcoTrackAPI.getMeta();
+    const currentMeta = meta.meta || null;
+    const progreso = meta.progreso || { totalCO2: 0, count: 0 };
+
+    if (currentMeta) {
+      metaInfo.textContent = `Meta semanal: ${currentMeta.objetivoCO2} kg CO2`;
+      metaValueInput.value = currentMeta.objetivoCO2;
+    } else {
+      metaInfo.textContent = 'Cargar meta';
+      metaValueInput.value = '';
+    }
+    weeklyCO2.textContent = `${(progreso.totalCO2 || 0).toFixed(2)} kg CO2`;
+  } catch (error) {
+    console.error('Error cargando meta:', error);
+    metaInfo.textContent = 'Error cargando meta';
+    weeklyCO2.textContent = '0 kg CO2';
   }
 };
 
@@ -226,9 +242,15 @@ activityForm.addEventListener('submit', async (event) => {
 metaForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   try {
-    const objetivoCO2 = Number(document.getElementById('metaValue').value);
-    await window.EcoTrackAPI.saveMeta(objetivoCO2);
+    const objetivoCO2 = Number(metaValueInput.value);
+    if (Number.isNaN(objetivoCO2) || objetivoCO2 < 0) {
+      return alert('Ingresa un valor válido para la meta');
+    }
+
+    const meta = await window.EcoTrackAPI.saveMeta(objetivoCO2);
     await refreshDashboard();
+    metaValueInput.value = '';
+    alert(`Meta guardada: ${meta.objetivoCO2} kg CO2 / semana`);
   } catch (error) {
     alert(error.message);
   }
