@@ -13,6 +13,7 @@ const metaForm = document.getElementById('metaForm');
 const metaValueInput = document.getElementById('metaValue');
 const metaInfo = document.getElementById('metaInfo');
 const weeklyCO2 = document.getElementById('weeklyCO2');
+const goalProgress = document.getElementById('goalProgress');
 const routeForm = document.getElementById('routeForm');
 const routeSuggestions = document.getElementById('routeSuggestions');
 const loginSection = document.getElementById('loginSection');
@@ -150,15 +151,28 @@ const refreshDashboard = async () => {
     if (currentMeta) {
       if (metaInfo) metaInfo.textContent = `Meta semanal: ${currentMeta.objetivoCO2} kg CO2`;
       if (metaValueInput) metaValueInput.value = currentMeta.objetivoCO2;
+      const totalCO2 = Number((progreso.totalCO2 || 0).toFixed(2));
+      const restante = Number((currentMeta.objetivoCO2 - totalCO2).toFixed(2));
+      if (goalProgress) {
+        if (restante > 0) {
+          goalProgress.textContent = `Te faltan ${restante} kg CO2 para alcanzar la meta semanal.`;
+        } else if (restante === 0) {
+          goalProgress.textContent = '¡Meta semanal alcanzada exactamente!';
+        } else {
+          goalProgress.textContent = `Has superado la meta por ${Math.abs(restante)} kg CO2.`;
+        }
+      }
     } else {
       if (metaInfo) metaInfo.textContent = 'Cargar meta';
       if (metaValueInput) metaValueInput.value = '';
+      if (goalProgress) goalProgress.textContent = 'Define una meta semanal para comparar tu progreso.';
     }
     if (weeklyCO2) weeklyCO2.textContent = `${(progreso.totalCO2 || 0).toFixed(2)} kg CO2`;
   } catch (error) {
     console.error('Error cargando meta:', error);
     if (metaInfo) metaInfo.textContent = 'Error cargando meta';
     if (weeklyCO2) weeklyCO2.textContent = '0 kg CO2';
+    if (goalProgress) goalProgress.textContent = 'No se pudo cargar el progreso de la meta.';
   }
 };
 
