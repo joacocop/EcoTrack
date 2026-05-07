@@ -97,6 +97,56 @@ exports.rankingGlobal = async (req, res) => {
   }
 };
 
+exports.prepareEmailData = async (req, res) => {
+  try {
+    const semana = req.query.semana || getWeekKey();
+    const { monday, sunday } = getCurrentWeekRange();
+
+    const meta = await Meta.findOne({ userId: new mongoose.Types.ObjectId(req.user.id), semana });
+    const actividades = await Actividad.find({
+      userId: new mongoose.Types.ObjectId(req.user.id),
+      fecha: { $gte: monday, $lte: sunday },
+    })
+      .sort({ fecha: -1 })
+      .limit(10)
+      .select('tipo detalles huellaCO2 fecha ubicacion');
+
+    const progresoResultado = await Actividad.aggregate([
+      {
+        $match: {
+          userId: new mongoose.Types.ObjectId(req.user.id),
+          fecha: { $gte: monday, $lte: sunday },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalCO2: { $sum: '$huellaCO2' },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const progreso = progresoResultado[0] || { totalCO2: 0, count: 0 };
+    const restante = meta ? Math.max(0, meta.objetivoCO2 - progreso.totalCO2) : null;
+
+    res.json({
+      usuario: {
+        nombre: req.user.nombre,
+        email: req.user.email,
+      },
+      semana,
+      meta: meta || null,
+      progreso,
+      restante,
+      actividades,
+    });
+  } catch (error) {
+    console.error('Error preparando datos para email:', error);
+    res.status(500).json({ message: 'Error preparando datos para email', error: error.message });
+  }
+};
+
 exports.reportSemanal = async (req, res) => {
   try {
     const hoy = new Date();
