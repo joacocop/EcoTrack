@@ -13,6 +13,8 @@ const metaForm = document.getElementById('metaForm');
 const metaValueInput = document.getElementById('metaValue');
 const metaInfo = document.getElementById('metaInfo');
 const weeklyCO2 = document.getElementById('weeklyCO2');
+const routeForm = document.getElementById('routeForm');
+const routeSuggestions = document.getElementById('routeSuggestions');
 const loginSection = document.getElementById('loginSection');
 const registerSection = document.getElementById('registerSection');
 const showRegister = document.getElementById('showRegister');
@@ -75,15 +77,36 @@ const renderDetailsFields = () => {
 };
 
 const showUI = async () => {
+  const token = getToken();
+  if (!token) {
+    console.log('No hay token, mostrando login');
+    authPanel.classList.remove('hidden');
+    dashboard.classList.add('hidden');
+    nav.classList.add('hidden');
+    return;
+  }
   try {
+    console.log('Intentando cargar sesión con token:', !!token);
     const profile = await window.EcoTrackAPI.profile();
+    console.log('Perfil cargado:', profile);
     authPanel.classList.add('hidden');
     dashboard.classList.remove('hidden');
     nav.classList.remove('hidden');
     userName.textContent = `Hola, ${profile.nombre}`;
     await refreshDashboard();
   } catch (error) {
-    clearToken();
+    console.error('Error en showUI:', error.message);
+    const authFailed =
+      error.message === 'Token inválido' ||
+      error.message === 'Token no proporcionado' ||
+      error.message === 'No se recibió token de autenticación';
+    if (authFailed) {
+      console.log('Borrando token por fallo de auth');
+      clearToken();
+    }
+    if (!authFailed) {
+      console.error('Error cargando sesión:', error);
+    }
     authPanel.classList.remove('hidden');
     dashboard.classList.add('hidden');
     nav.classList.add('hidden');
@@ -101,18 +124,22 @@ const refreshDashboard = async () => {
 
   try {
     const ranking = await window.EcoTrackAPI.getRanking();
-    rankingList.innerHTML = ranking
-      .map(
-        (item, index) => `
-          <div class="activity-card">
-            <strong>#${index + 1} ${item.usuario.nombre}</strong>
-            <p>${item.totalCO2.toFixed(2)} kg CO2</p>
-          </div>`
-      )
-      .join('');
+    if (rankingList) {
+      rankingList.innerHTML = ranking
+        .map(
+          (item, index) => `
+            <div class="activity-card">
+              <strong>#${index + 1} ${item.usuario.nombre}</strong>
+              <p>${item.totalCO2.toFixed(2)} kg CO2</p>
+            </div>`
+        )
+        .join('');
+    } else {
+      console.error('rankingList no encontrado');
+    }
   } catch (error) {
     console.error('Error cargando ranking:', error);
-    rankingList.innerHTML = '<p>No se pudo cargar el ranking.</p>';
+    if (rankingList) rankingList.innerHTML = '<p>No se pudo cargar el ranking.</p>';
   }
 
   try {
@@ -121,18 +148,41 @@ const refreshDashboard = async () => {
     const progreso = meta.progreso || { totalCO2: 0, count: 0 };
 
     if (currentMeta) {
-      metaInfo.textContent = `Meta semanal: ${currentMeta.objetivoCO2} kg CO2`;
-      metaValueInput.value = currentMeta.objetivoCO2;
+      if (metaInfo) metaInfo.textContent = `Meta semanal: ${currentMeta.objetivoCO2} kg CO2`;
+      if (metaValueInput) metaValueInput.value = currentMeta.objetivoCO2;
     } else {
-      metaInfo.textContent = 'Cargar meta';
-      metaValueInput.value = '';
+      if (metaInfo) metaInfo.textContent = 'Cargar meta';
+      if (metaValueInput) metaValueInput.value = '';
     }
-    weeklyCO2.textContent = `${(progreso.totalCO2 || 0).toFixed(2)} kg CO2`;
+    if (weeklyCO2) weeklyCO2.textContent = `${(progreso.totalCO2 || 0).toFixed(2)} kg CO2`;
   } catch (error) {
     console.error('Error cargando meta:', error);
-    metaInfo.textContent = 'Error cargando meta';
-    weeklyCO2.textContent = '0 kg CO2';
+    if (metaInfo) metaInfo.textContent = 'Error cargando meta';
+    if (weeklyCO2) weeklyCO2.textContent = '0 kg CO2';
   }
+};
+
+const renderRouteSuggestions = (data) => {
+  if (!data || !Array.isArray(data.sugerencias)) {
+    routeSuggestions.textContent = 'No se encontraron sugerencias.';
+    return;
+  }
+
+  routeSuggestions.innerHTML = `
+    <p><strong>Distancia base:</strong> ${data.distanciaBaseKm} km</p>
+    ${data.sugerencias
+      .map(
+        (option, index) => `
+      <div class="activity-card">
+        <strong>${index + 1}. ${option.nombre}</strong>
+        <p>${option.descripcion}</p>
+        <p><strong>Transporte:</strong> ${option.transporte}</p>
+        <p><strong>Distancia:</strong> ${option.distanciaKm} km</p>
+        <p><strong>Huella estimada:</strong> ${option.huellaCO2} kg CO2</p>
+      </div>`
+      )
+      .join('')}
+  `;
 };
 
 const buildDetails = () => {
@@ -159,34 +209,34 @@ const buildDetails = () => {
 
 activityType.addEventListener('change', renderDetailsFields);
 
-showRegister.addEventListener('click', (e) => {
+if (showRegister) showRegister.addEventListener('click', (e) => {
   e.preventDefault();
   loginSection.classList.add('hidden');
   registerSection.classList.remove('hidden');
 });
 
-showLogin.addEventListener('click', (e) => {
+if (showLogin) showLogin.addEventListener('click', (e) => {
   e.preventDefault();
   registerSection.classList.add('hidden');
   loginSection.classList.remove('hidden');
 });
 
-scrollToActivity.addEventListener('click', (e) => {
+if (scrollToActivity) scrollToActivity.addEventListener('click', (e) => {
   e.preventDefault();
   document.getElementById('activityForm').scrollIntoView({ behavior: 'smooth' });
 });
 
-scrollToMap.addEventListener('click', (e) => {
+if (scrollToMap) scrollToMap.addEventListener('click', (e) => {
   e.preventDefault();
   document.getElementById('map').scrollIntoView({ behavior: 'smooth' });
 });
 
-scrollToStats.addEventListener('click', (e) => {
+if (scrollToStats) scrollToStats.addEventListener('click', (e) => {
   e.preventDefault();
   document.getElementById('rankingList').scrollIntoView({ behavior: 'smooth' });
 });
 
-logoutButton.addEventListener('click', () => {
+if (logoutButton) logoutButton.addEventListener('click', () => {
   clearToken();
   authPanel.classList.remove('hidden');
   dashboard.classList.add('hidden');
@@ -195,12 +245,15 @@ logoutButton.addEventListener('click', () => {
   registerSection.classList.add('hidden');
 });
 
-loginForm.addEventListener('submit', async (event) => {
+if (loginForm) loginForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   try {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
     const data = await window.EcoTrackAPI.login(email, password);
+    if (!data.token) {
+      throw new Error('No se recibió token de autenticación');
+    }
     setToken(data.token);
     await showUI();
   } catch (error) {
@@ -208,7 +261,7 @@ loginForm.addEventListener('submit', async (event) => {
   }
 });
 
-registerForm.addEventListener('submit', async (event) => {
+if (registerForm) registerForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   try {
     const nombre = document.getElementById('registerName').value;
@@ -222,7 +275,7 @@ registerForm.addEventListener('submit', async (event) => {
   }
 });
 
-activityForm.addEventListener('submit', async (event) => {
+if (activityForm) activityForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   try {
     const tipo = activityType.value;
@@ -239,7 +292,28 @@ activityForm.addEventListener('submit', async (event) => {
   }
 });
 
-metaForm.addEventListener('submit', async (event) => {
+if (routeForm) routeForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  try {
+    const from = {
+      lat: Number(document.getElementById('routeStartLat').value),
+      lng: Number(document.getElementById('routeStartLng').value),
+    };
+    const to = {
+      lat: Number(document.getElementById('routeEndLat').value),
+      lng: Number(document.getElementById('routeEndLng').value),
+    };
+    const vehiculo = document.getElementById('routeVehicle').value;
+    const combustible = document.getElementById('routeFuel').value;
+
+    const suggestionData = await window.EcoTrackAPI.suggestRoute({ from, to, vehiculo, combustible });
+    renderRouteSuggestions(suggestionData);
+  } catch (error) {
+    alert(error.message);
+  }
+});
+
+if (metaForm) metaForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   try {
     const objetivoCO2 = Number(metaValueInput.value);

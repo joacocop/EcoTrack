@@ -25,7 +25,25 @@ app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, '..', '..', 'frontend', 'index.html'));
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
-});
+const PORT = Number(process.env.PORT) || 5000;
+
+const startServer = (port) => {
+  const server = app.listen(port, () => {
+    console.log(`Servidor ejecutándose en http://localhost:${port}`);
+  });
+
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      const alternativePort = port + 1;
+      console.error(`El puerto ${port} ya está en uso. Intentando puerto ${alternativePort}...`);
+      startServer(alternativePort);
+    } else {
+      console.error('Error al iniciar el servidor:', error);
+      process.exit(1);
+    }
+  });
+
+  return server;
+};
+
+startServer(PORT);

@@ -1,18 +1,37 @@
 ﻿const apiBase = '/api';
 
-const getToken = () => localStorage.getItem('ecotrackToken');
-const setToken = (token) => localStorage.setItem('ecotrackToken', token);
+const getToken = () => {
+  const token = localStorage.getItem('ecotrackToken');
+  return token && token !== 'undefined' && token !== 'null' ? token : null;
+};
+const setToken = (token) => {
+  if (token) {
+    localStorage.setItem('ecotrackToken', token);
+  }
+};
 const clearToken = () => localStorage.removeItem('ecotrackToken');
 
-const authHeaders = () => ({
-  'Content-Type': 'application/json',
-  Authorization: `Bearer ${getToken()}`,
-});
+const authHeaders = () => {
+  const token = getToken();
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  return headers;
+};
 
 const request = async (url, options = {}) => {
   const res = await fetch(url, options);
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || 'Error en la API');
+  let data = null;
+  try {
+    data = await res.json();
+  } catch (err) {
+    // Fall back when the response body is not valid JSON
+  }
+  if (res.status === 401) {
+    clearToken();
+  }
+  if (!res.ok) throw new Error((data && data.message) || 'Error en la API');
   return data;
 };
 
@@ -30,7 +49,10 @@ const login = (email, password) =>
     body: JSON.stringify({ email, password }),
   });
 
-const profile = () => request(`${apiBase}/usuarios/me`, { headers: authHeaders() });
+const profile = () => {
+  console.log('Llamando a profile con token:', getToken());
+  return request(`${apiBase}/usuarios/me`, { headers: authHeaders() });
+};
 const getActivities = () => request(`${apiBase}/actividades`, { headers: authHeaders() });
 const createActivity = (activity) =>
   request(`${apiBase}/actividades`, {
@@ -46,6 +68,12 @@ const saveMeta = (objetivoCO2) =>
     body: JSON.stringify({ objetivoCO2 }),
   });
 const getMeta = () => request(`${apiBase}/estadisticas/metas`, { headers: authHeaders() });
+const suggestRoute = (routeData) =>
+  request(`${apiBase}/actividades/sugerir`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(routeData),
+  });
 
 window.EcoTrackAPI = {
   register,
@@ -56,6 +84,7 @@ window.EcoTrackAPI = {
   getRanking,
   saveMeta,
   getMeta,
+  suggestRoute,
   getToken,
   setToken,
   clearToken,

@@ -95,6 +95,35 @@
         </div>
 
         <article class="panel full-width">
+          <h2>Sugerir ruta eco</h2>
+          <form id="routeForm">
+            <label>Desde latitud</label>
+            <input type="number" step="any" id="routeStartLat" placeholder="-34.6" required />
+            <label>Desde longitud</label>
+            <input type="number" step="any" id="routeStartLng" placeholder="-58.4" required />
+            <label>Hasta latitud</label>
+            <input type="number" step="any" id="routeEndLat" placeholder="-34.5" required />
+            <label>Hasta longitud</label>
+            <input type="number" step="any" id="routeEndLng" placeholder="-58.3" required />
+            <label>Vehículo preferido</label>
+            <select id="routeVehicle">
+              <option value="auto">Auto</option>
+              <option value="moto">Moto</option>
+              <option value="bus">Bus</option>
+              <option value="bici">Bici</option>
+            </select>
+            <label>Combustible</label>
+            <select id="routeFuel">
+              <option value="nafta">Nafta</option>
+              <option value="diesel">Diésel</option>
+              <option value="electrico">Eléctrico</option>
+            </select>
+            <button type="submit">Sugerir ruta</button>
+          </form>
+          <div id="routeSuggestions">Ingrese origen y destino para ver la ruta eco sugerida.</div>
+        </article>
+
+        <article class="panel full-width">
           <h2>Mapa de actividades</h2>
           <div id="map"></div>
         </article>
